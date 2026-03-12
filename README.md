@@ -1,38 +1,37 @@
 # 🚀 Adaptive Network Switching System
 
-> **Next-generation intelligent network selection using Weighted Multi-Criteria Decision Analysis (WMCDA)**
+> **Next-generation intelligent real-time network selection using Weighted Multi-Criteria Decision Analysis (WMCDA)**
 
-An AI-powered system that analyzes available networks (5G, WiFi 6E, WiFi 6, LTE, Satellite, 3G) and selects the optimal network based on a composite scoring formula with adaptive profiles.
+An AI-powered system that continuously monitors available real WiFi networks on Windows, measures live performance metrics (latency, throughput, signal), and automatically switches to the optimal network based on a composite scoring formula with adaptive profiles.
 
 ---
 
 ## 📸 Features
 
-- **WMCDA Scoring Engine** — Custom formula evaluating 6 network metrics with adaptive weights
-- **6 Usage Profiles** — Balanced, Streaming, Gaming, Enterprise, Budget, IoT
-- **Real-time Dashboard** — Premium glassmorphism UI with radar charts and live rankings
-- **10 Simulated Networks** — Realistic 5G/WiFi/LTE/Satellite networks with dynamic jitter
-- **Network Comparison** — Side-by-side radar chart visualization of top networks
-- **Scan History** — SQLite-backed persistence of all scans and switch events
-- **WebSocket** — Real-time live monitoring endpoint
-- **REST API** — Full API with auto-generated OpenAPI docs
+- **Real-Time Network Engine** — Interacts with Windows OS (`netsh` & `psutil`) to capture live WiFi data, signal profiles, and byte counters.
+- **Auto-Switching with Hysteresis** — Automatically connects to better known networks if current quality drops, while preventing rapid connection flapping.
+- **WMCDA Scoring Engine** — Custom formula evaluating 6 network metrics with adaptive weights based on your usage profile.
+- **6 Usage Profiles** — Balanced, Streaming, Gaming, Enterprise, Cost Sensitive, IoT.
+- **Sleek & Simple Dashboard** — Clean, modern Mist Grey & Midnight Blue UI with radar charts, metric polling, and live network rankings.
+- **Live Polling & WebSocket** — Real-time monitoring endpoints to constantly track connection health.
+- **REST API** — Full local API backend with auto-generated OpenAPI documentation.
 
 ---
 
 ## 🧮 Scoring Formula
 
-The system uses **Weighted Multi-Criteria Decision Analysis (WMCDA):**
+The system ranks networks locally using **Weighted Multi-Criteria Decision Analysis (WMCDA):**
 
 ```
 CNS = Σ(wi × Ni) / Σ(wi)
 
 Where:
-  w₁ = 0.25 × Signal Strength (normalized)
-  w₂ = 0.20 × Bandwidth (normalized)
-  w₃ = 0.20 × Latency (inverted, normalized)
-  w₄ = 0.15 × Reliability (normalized)
-  w₅ = 0.10 × Security Level (normalized)
-  w₆ = 0.10 × Cost (inverted, normalized)
+  w₁ = [Profile] × Signal Strength (normalized to 100%)
+  w₂ = [Profile] × Bandwidth/Throughput (measured in Mbps, normalized)
+  w₃ = [Profile] × Latency (ping in ms, inverted and normalized)
+  w₄ = [Profile] × Reliability (packet delivery ratio, normalized)
+  w₅ = [Profile] × Security Level (WEP, WPA2, WPA3, mapped 0-4)
+  w₆ = [Profile] × Cost Efficiency (inverted, normalized)
 ```
 
 Weights dynamically shift based on the selected usage profile.
@@ -43,12 +42,12 @@ Weights dynamically shift based on the selected usage profile.
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React + Vite |
-| Charts | Recharts |
-| Backend | Python FastAPI |
-| Database | SQLite |
-| Real-time | WebSocket |
-| Styling | Custom CSS (Glassmorphism) |
+| **Frontend** | React, Vite |
+| **Styling** | Vanilla CSS (Sleek Mist Grey & Midnight Blue theme) |
+| **Charts** | Recharts |
+| **Backend** | Python FastAPI |
+| **OS Interface** | `subprocess` (netsh), `psutil`, ICMP ping |
+| **Database** | SQLite |
 
 ---
 
@@ -58,21 +57,22 @@ Weights dynamically shift based on the selected usage profile.
 adaptive-network-switching/
 ├── backend/
 │   ├── main.py            # FastAPI server (REST + WebSocket)
-│   ├── models.py           # Pydantic data models
-│   ├── scoring.py          # WMCDA scoring engine
-│   ├── scanner.py          # Network simulator
-│   ├── database.py         # SQLite persistence
-│   ├── config.py           # Configuration & weights
-│   └── requirements.txt    # Python dependencies
+│   ├── models.py          # Pydantic data models
+│   ├── scoring.py         # WMCDA scoring engine
+│   ├── scanner.py         # OS-level WiFi scanning & switching
+│   ├── monitor.py         # Background daemon for auto-switching
+│   ├── database.py        # SQLite persistence
+│   ├── config.py          # Configuration & weights
+│   └── requirements.txt   # Python dependencies
 ├── frontend/
 │   ├── src/
-│   │   ├── App.jsx         # Main application
-│   │   ├── index.css       # Global styles
-│   │   └── components/     # React components
-│   ├── index.html          # Entry HTML
-│   └── package.json        # Node dependencies
+│   │   ├── App.jsx        # Main application dashboard
+│   │   ├── index.css      # Solid Mist Grey / Midnight Blue styles
+│   │   └── components/    # React modular components
+│   ├── index.html         # Entry HTML
+│   └── package.json       # Node dependencies
 ├── docs/
-│   └── future_work.md      # Extension methodology
+│   └── future_work.md     # Extension methodology
 └── README.md
 ```
 
@@ -81,6 +81,7 @@ adaptive-network-switching/
 ## 🚀 Quick Start
 
 ### Prerequisites
+- Windows OS (required for native `netsh` integration)
 - Python 3.9+ 
 - Node.js 18+
 
@@ -107,10 +108,10 @@ The UI opens at **http://localhost:5173**
 
 ### 3. Use the App
 
-1. Select a **usage profile** (Balanced, Gaming, Streaming, etc.)
-2. Click **📡 Scan Networks**
-3. View ranked networks, radar chart, and best recommendation
-4. Switch profiles to see how weights change the rankings
+1. Select a **usage profile** based on your current task (Balanced, Gaming, Streaming, etc.)
+2. Click **📡 Scan Networks** to measure real network characteristics.
+3. Turn on the **Monitor Panel** to begin tracking connection health in the background. The system will auto-switch to faster networks if your active connection degrades.
+4. View real-time radar charting of connection strength, latency, and throughput mapping.
 
 ---
 
@@ -118,14 +119,13 @@ The UI opens at **http://localhost:5173**
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/scan?profile=balanced` | Scan and score networks |
-| `POST` | `/api/scan` | Scan with custom weights |
-| `GET` | `/api/profiles` | List all usage profiles |
-| `GET` | `/api/formula?profile=gaming` | Get scoring formula details |
-| `GET` | `/api/history` | Scan and switch history |
-| `GET` | `/api/metrics` | Time-series metrics data |
-| `GET` | `/api/status` | System status |
-| `WS` | `/ws/live` | Real-time monitoring |
+| `GET` | `/api/scan?profile=balanced` | OS scan to evaluate visible networks |
+| `POST` | `/api/switch` | Force switch to known SSID |
+| `GET` | `/api/monitor/status` | Read daemon auto-switch status |
+| `POST` | `/api/monitor/{start/stop}` | Toggle background hysteresis engine |
+| `GET` | `/api/latency` | Run ICMP latency tests |
+| `GET` | `/api/throughput` | Run psutil byte-interval sampling |
+| `WS` | `/ws/live` | Real-time monitoring data stream |
 
 ---
 
@@ -133,23 +133,22 @@ The UI opens at **http://localhost:5173**
 
 | Metric | Range | Best Value | Weight (Balanced) |
 |--------|-------|------------|-------------------|
-| Signal Strength | -100 to -30 dBm | -30 dBm (highest) | 25% |
-| Bandwidth | 0 – 10,000 Mbps | 10,000 Mbps | 20% |
+| Signal Strength | 0 to 100% | 100% | 25% |
+| Bandwidth | 0 – 1,000 Mbps | 1,000 Mbps | 20% |
 | Latency | 1 – 500 ms | 1 ms (lowest) | 20% |
 | Reliability | 0 – 100% | 100% | 15% |
-| Security Level | 0 – 5 | 5 (strongest) | 10% |
-| Cost | $0 – $100/mo | $0 (free) | 10% |
+| Security Level | WEP - WPA3 (0 – 4) | WPA3 (Level 4) | 10% |
+| Cost | 0.0 - 1.0 (Metered/Free) | 1.0 (free) | 10% |
 
 ---
 
 ## 🔮 Future Extensions
 
 See [`docs/future_work.md`](docs/future_work.md) for structured methodology on:
-- Real OS-level network scanning (Windows/Linux/macOS)
-- Automatic network switching with hysteresis
-- ML-based quality prediction
+- Cross-platform network scanning (Linux `nmcli` / macOS `airport`)
+- ML-based predictive network connection quality
 - Multi-SIM/Multi-WAN bonding
-- QoS-aware traffic routing
+- QoS-aware application traffic routing
 
 ---
 
