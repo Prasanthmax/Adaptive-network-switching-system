@@ -2,7 +2,7 @@
 
 ## 📋 What's Built vs. What Needs Extension
 
-This document outlines the **structured methodology** for extending the Adaptive Network Switching System beyond its current simulation-based implementation into a production-grade real-world system.
+This document outlines the **structured methodology** for extending the Adaptive Network Switching System beyond its current implementation into a production-grade system.
 
 ---
 
@@ -10,43 +10,25 @@ This document outlines the **structured methodology** for extending the Adaptive
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| WMCDA Scoring Engine | ✅ Complete | Full weighted multi-criteria decision analysis |
+| WMCDA Scoring Engine v2 | ✅ Complete | Weighted multi-criteria scoring with **Dynamic Stability Penalty** |
 | Adaptive Profiles | ✅ Complete | 6 usage profiles with dynamic weight adjustment |
-| Network Simulation | ✅ Complete | 10 realistic network templates with time-of-day jitter |
-| REST API | ✅ Complete | FastAPI with scan, profiles, formula, history endpoints |
-| WebSocket | ✅ Complete | Real-time network monitoring channel |
-| React Dashboard | ✅ Complete | Premium glassmorphism UI with radar charts |
+| Real Network Scanning | ✅ Complete | Windows `netsh` integration for live WiFi data |
+| Auto-Switching with Hysteresis | ✅ Complete | Background daemon with cooldown and flapping prevention |
+| QoS Traffic Routing | ✅ Complete | DSCP tagging via PowerShell `New-NetQosPolicy` per profile |
+| REST API + WebSocket | ✅ Complete | FastAPI with scan, profiles, formula, QoS, history endpoints |
+| CORS Security | ✅ Complete | Restricted to frontend origins only |
+| Subprocess Safety | ✅ Complete | `CREATE_NO_WINDOW` flag on all subprocess calls |
+| Duo Minimalist Dashboard | ✅ Complete | Dark charcoal + electric cyan, no glassmorphism |
+| Radar Chart Comparisons | ✅ Complete | Recharts-based multi-network comparison |
 | Scan History DB | ✅ Complete | SQLite persistence for scan results and switch events |
 
 ---
 
-## 🔧 Phase 1: Real Network Integration (2-3 weeks)
+## 🔧 Phase 1: Cross-Platform Support (2-3 weeks)
 
 ### 1.1 OS-Level Network Scanning
 
-Replace the simulated scanner with real OS API calls:
-
-**Windows:**
-```python
-import subprocess
-import re
-
-def scan_wifi_windows():
-    """Use netsh to scan real WiFi networks."""
-    result = subprocess.run(
-        ['netsh', 'wlan', 'show', 'networks', 'mode=bssid'],
-        capture_output=True, text=True
-    )
-    # Parse SSID, signal strength, channel, authentication
-    networks = parse_netsh_output(result.stdout)
-    return networks
-
-def get_cellular_windows():
-    """Use Windows Mobile Broadband API for cellular networks."""
-    # Use ctypes or win32com to access MBN API
-    # Reference: Windows.Networking.Connectivity namespace
-    pass
-```
+Extend the scanner to support Linux and macOS:
 
 **Linux:**
 ```python
@@ -57,11 +39,6 @@ def scan_wifi_linux():
         capture_output=True, text=True
     )
     return parse_nmcli_output(result.stdout)
-
-def get_cellular_linux():
-    """Use ModemManager D-Bus API for cellular."""
-    # mmcli -m 0 --signal-get
-    pass
 ```
 
 **macOS:**
@@ -74,77 +51,16 @@ def scan_wifi_macos():
     return [parse_cwnetwork(n) for n in networks]
 ```
 
-### 1.2 Bandwidth & Latency Measurement
+### 1.2 Cross-Platform QoS
 
-```python
-import speedtest   # speedtest-cli library
-import subprocess
-
-def measure_bandwidth(target_host="8.8.8.8"):
-    """Active bandwidth measurement using speedtest or iperf3."""
-    st = speedtest.Speedtest()
-    st.get_best_server()
-    download = st.download() / 1_000_000  # Mbps
-    upload = st.upload() / 1_000_000
-    return download, upload
-
-def measure_latency(host="8.8.8.8", count=10):
-    """Measure round-trip latency using ICMP ping."""
-    result = subprocess.run(
-        ['ping', '-n', str(count), host],
-        capture_output=True, text=True
-    )
-    # Parse average latency from output
-    return parse_ping_output(result.stdout)
-```
+- **Linux:** Use `tc` (traffic control) and `iptables` DSCP marking.
+- **macOS:** Use `pfctl` or `dnctl` for packet classification.
 
 ---
 
-## 🔧 Phase 2: Automatic Network Switching (3-4 weeks)
+## 🔧 Phase 2: Machine Learning Enhancement (4-6 weeks)
 
-### 2.1 Platform-Specific Switching
-
-**Windows:**
-```powershell
-# Connect to a specific WiFi network
-netsh wlan connect name="NetworkSSID" ssid="NetworkSSID"
-
-# Switch cellular preference
-# Use Windows.Networking.Connectivity API via PowerShell
-```
-
-**Linux:**
-```bash
-# Switch WiFi network
-nmcli device wifi connect "NetworkSSID" password "password"
-
-# Set network priority
-nmcli connection modify "NetworkSSID" connection.autoconnect-priority 100
-```
-
-### 2.2 Seamless Handover Logic
-
-```python
-class HandoverManager:
-    HYSTERESIS_THRESHOLD = 0.05  # 5% score margin to prevent flapping
-    MIN_SWITCH_INTERVAL = 30     # Minimum seconds between switches
-    
-    def should_switch(self, current_score, candidate_score, last_switch_time):
-        """Determine if a network switch is beneficial."""
-        time_since_last = time.time() - last_switch_time
-        score_improvement = candidate_score - current_score
-        
-        return (
-            score_improvement > self.HYSTERESIS_THRESHOLD and
-            time_since_last > self.MIN_SWITCH_INTERVAL
-        )
-```
-
----
-
-## 🔧 Phase 3: Machine Learning Enhancement (4-6 weeks)
-
-### 3.1 Predictive Network Quality
+### 2.1 Predictive Network Quality
 
 Train a model on historical metrics to predict network quality:
 
@@ -163,7 +79,7 @@ def train_quality_predictor(history_df):
     return model
 ```
 
-### 3.2 Reinforcement Learning for Switching Policy
+### 2.2 Reinforcement Learning for Switching Policy
 
 ```python
 # State:  (current_network_metrics, available_networks_metrics, time_features)
@@ -181,25 +97,26 @@ class NetworkSwitchingAgent:
 
 ---
 
-## 🔧 Phase 4: Advanced Features (Ongoing)
+## 🔧 Phase 3: Advanced Features (Ongoing)
 
-### 4.1 Multi-SIM / Multi-WAN Bonding
+### 3.1 Multi-SIM / Multi-WAN Bonding
 - Aggregate bandwidth across multiple connections
 - Use MPTCP (Multi-Path TCP) for link aggregation
 - Implement failover chains
 
-### 4.2 QoS-Aware Routing
-- Route different traffic types through different networks
-- Video → highest bandwidth network
-- VoIP → lowest latency network
-- Background sync → cheapest network
+### 3.2 Per-Application QoS Routing
+- Route different traffic types through different networks:
+  - Video → highest bandwidth network
+  - VoIP → lowest latency network
+  - Background sync → cheapest network
+- Uses Windows WFP (Windows Filtering Platform) for per-app packet inspection.
 
-### 4.3 Security Enhancements
+### 3.3 Security Enhancements
 - VPN auto-connect on untrusted networks
 - Certificate-based network authentication
 - Rogue AP detection
 
-### 4.4 Edge Computing Integration
+### 3.4 Edge Computing Integration
 - MEC (Multi-access Edge Computing) awareness
 - Compute offloading decisions based on network quality
 - Network slice selection for 5G SA
@@ -232,9 +149,13 @@ class NetworkSwitchingAgent:
 │  ┌─────────────────────────────────────────┐  │
 │  │     FastAPI Backend (localhost:8000)     │  │
 │  │  ┌──────────┐  ┌────────┐  ┌────────┐  │  │
-│  │  │ Scoring  │  │Scanner │  │   DB   │  │  │
-│  │  │  Engine  │  │Service │  │(SQLite)│  │  │
+│  │  │ Scoring  │  │Scanner │  │  QoS   │  │  │
+│  │  │ Engine   │  │Service │  │ Router │  │  │
 │  │  └──────────┘  └────────┘  └────────┘  │  │
+│  │           ┌────────┐                    │  │
+│  │           │   DB   │                    │  │
+│  │           │(SQLite)│                    │  │
+│  │           └────────┘                    │  │
 │  └─────────────────────────────────────────┘  │
 └──────────────────────────────────────────────┘
 ```
@@ -248,3 +169,4 @@ class NetworkSwitchingAgent:
 - MPTCP RFC 8684 — Multi-Path TCP
 - TOPSIS — Technique for Order Preference by Similarity
 - AHP — Analytic Hierarchy Process
+- RFC 2474 — Definition of the Differentiated Services Field (DS Field) in the IPv4 and IPv6 Headers

@@ -1,10 +1,10 @@
 const PROFILES = [
-    { id: 'balanced', label: '⚖️ Balanced', desc: 'General use' },
-    { id: 'streaming', label: '🎬 Streaming', desc: 'Max bandwidth' },
-    { id: 'gaming', label: '🎮 Gaming', desc: 'Low latency' },
-    { id: 'enterprise', label: '🏢 Enterprise', desc: 'Security & reliability' },
-    { id: 'cost_sensitive', label: '💰 Budget', desc: 'Lowest cost' },
-    { id: 'iot', label: '📟 IoT', desc: 'Always connected' },
+    { id: 'balanced', label: 'Balanced', desc: 'General use' },
+    { id: 'streaming', label: 'Streaming', desc: 'Max bandwidth' },
+    { id: 'gaming', label: 'Gaming', desc: 'Low latency' },
+    { id: 'enterprise', label: 'Enterprise', desc: 'Security & reliability' },
+    { id: 'cost_sensitive', label: 'Budget', desc: 'Lowest cost' },
+    { id: 'iot', label: 'IoT', desc: 'Always connected' },
 ];
 
 export default function ControlsBar({ profile, onProfileChange, onScan, scanning, onMonitorToggle, monitoring }) {
@@ -22,20 +22,18 @@ export default function ControlsBar({ profile, onProfileChange, onScan, scanning
                     </button>
                 ))}
             </div>
-            <div style={{ display: 'flex', gap: '10px', marginLeft: 'auto' }}>
+            <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
                 <button
-                    className={`scan-btn ${monitoring ? 'monitoring' : ''}`}
+                    className="scan-btn"
                     onClick={() => onMonitorToggle(monitoring ? 'stop' : 'start')}
                     style={{
-                        background: monitoring
-                            ? 'linear-gradient(135deg, #10b981, #059669)'
-                            : 'var(--bg-glass)',
-                        border: monitoring ? 'none' : '1px solid var(--border-glass)',
-                        color: monitoring ? 'white' : 'var(--text-secondary)',
-                        boxShadow: monitoring ? '0 0 20px rgba(16,185,129,0.3)' : 'none',
+                        background: monitoring ? 'var(--accent-emerald)' : 'transparent',
+                        border: `1px solid ${monitoring ? 'var(--accent-emerald)' : 'var(--border-default)'}`,
+                        color: monitoring ? '#0D2818' : 'var(--text-secondary)',
+                        boxShadow: monitoring ? '0 4px 16px rgba(74, 222, 128, 0.15)' : 'none',
                     }}
                 >
-                    {monitoring ? '🔴 Stop Monitor' : '👁️ Auto Monitor'}
+                    {monitoring ? 'Stop Monitor' : 'Auto Monitor'}
                 </button>
                 <button
                     className={`scan-btn ${scanning ? 'scanning' : ''}`}
@@ -48,7 +46,7 @@ export default function ControlsBar({ profile, onProfileChange, onScan, scanning
                             Scanning...
                         </>
                     ) : (
-                        <>📡 Scan Networks</>
+                        <>Scan Networks</>
                     )}
                 </button>
             </div>
