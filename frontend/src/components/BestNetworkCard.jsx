@@ -7,21 +7,22 @@ export default function BestNetworkCard({ best, onSwitch }) {
         <div className="glass-card animate-in delay-2">
             <div className="card-header">
                 <div className="card-title">
-                    <span className="icon">🏆</span>
                     Best Network
                 </div>
                 <span className="card-badge">Rank #1</span>
             </div>
             <div className="best-network-card">
-                <div className="best-crown">{isConnected ? '🔗' : '👑'}</div>
+                <div className="best-crown" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--accent-emerald)', fontWeight: 700, marginBottom: '8px' }}>
+                    {isConnected ? 'Active Connection' : 'Optimal Candidate'}
+                </div>
                 <div className="best-name">{best.ssid}</div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
                     {best.generation || best.radio_type} • {best.band} • Ch {best.channel}
                 </div>
 
                 <div className="best-score-large">
                     {(best.composite_score * 100).toFixed(1)}
-                    <span style={{ fontSize: '1.2rem', opacity: 0.6 }}>%</span>
+                    <span style={{ fontSize: '1rem', opacity: 0.5 }}>%</span>
                 </div>
                 <div className="best-score-label">Composite Network Score</div>
 
@@ -47,8 +48,8 @@ export default function BestNetworkCard({ best, onSwitch }) {
                         <div className="best-metric-value">L{best.security_level}/4</div>
                     </div>
                     <div className="best-metric">
-                        <div className="best-metric-label">Auth</div>
-                        <div className="best-metric-value" style={{ fontSize: '0.8rem' }}>{best.authentication}</div>
+                        <div className="best-metric-label">Stability</div>
+                        <div className="best-metric-value">{best.stability_factor ? (best.stability_factor * 100).toFixed(0) : '—'}%</div>
                     </div>
                 </div>
 
@@ -60,18 +61,18 @@ export default function BestNetworkCard({ best, onSwitch }) {
                         style={{
                             marginTop: '16px',
                             padding: '10px 28px',
-                            background: 'linear-gradient(135deg, #10b981, #059669)',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: 'var(--radius-full)',
-                            fontSize: '0.85rem',
-                            fontWeight: 600,
+                            background: 'var(--accent-emerald)',
+                            color: '#0D2818',
+                            border: '1px solid var(--accent-emerald)',
+                            borderRadius: 'var(--radius-sm)',
+                            fontSize: '0.82rem',
+                            fontWeight: 700,
                             fontFamily: 'inherit',
                             cursor: 'pointer',
-                            boxShadow: '0 0 20px rgba(16, 185, 129, 0.3)',
+                            boxShadow: '0 4px 16px rgba(74, 222, 128, 0.15)',
                         }}
                     >
-                        ⚡ Switch to {best.ssid}
+                        Switch to {best.ssid}
                     </button>
                 )}
 
@@ -79,14 +80,14 @@ export default function BestNetworkCard({ best, onSwitch }) {
                     <div style={{
                         marginTop: '16px',
                         padding: '8px 20px',
-                        background: 'rgba(16, 185, 129, 0.1)',
-                        border: '1px solid rgba(16, 185, 129, 0.2)',
-                        borderRadius: 'var(--radius-full)',
-                        fontSize: '0.8rem',
-                        color: '#6ee7b7',
-                        fontWeight: 600,
+                        background: 'var(--accent-emerald-dim)',
+                        border: '1px solid rgba(74, 222, 128, 0.25)',
+                        borderRadius: 'var(--radius-sm)',
+                        fontSize: '0.78rem',
+                        color: 'var(--accent-emerald)',
+                        fontWeight: 700,
                     }}>
-                        ✓ Currently Connected
+                        Currently Connected
                     </div>
                 )}
             </div>

@@ -12,10 +12,14 @@ Uses native Windows commands (netsh) to:
 
 import subprocess
 import re
+import sys
 import time
 import psutil
 from typing import List, Optional, Dict, Tuple
 from config import SECURITY_LEVELS, RADIO_GENERATIONS, AUTO_SWITCH
+
+# Windows-only flag to hide console windows during subprocess calls
+_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 
 
 # ============================================================================
@@ -32,6 +36,7 @@ def _run_netsh(args: list) -> str:
             encoding="utf-8",
             errors="replace",
             timeout=10,
+            creationflags=_NO_WINDOW,
         )
         return result.stdout or ""
     except Exception as e:
@@ -230,6 +235,7 @@ def measure_latency(host: str = None, count: int = None) -> dict:
             capture_output=True,
             text=True,
             timeout=count * 3 + 5,
+            creationflags=_NO_WINDOW,
         )
         output = result.stdout
         
@@ -355,6 +361,7 @@ def switch_network(ssid: str) -> dict:
             encoding="utf-8",
             errors="replace",
             timeout=15,
+            creationflags=_NO_WINDOW,
         )
         
         output = (result.stdout or "") + (result.stderr or "")
@@ -381,6 +388,7 @@ def disconnect_network() -> dict:
         result = subprocess.run(
             ["netsh", "wlan", "disconnect"],
             capture_output=True, text=True, timeout=10,
+            creationflags=_NO_WINDOW,
         )
         return {"success": True, "message": result.stdout.strip()}
     except Exception as e:

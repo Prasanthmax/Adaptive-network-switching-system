@@ -9,7 +9,7 @@ import {
     Legend,
 } from 'recharts';
 
-const COLORS = ['#6366f1', '#22d3ee', '#10b981', '#f59e0b', '#f43f5e'];
+const COLORS = ['#2872A1', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'];
 const METRIC_LABELS = {
     signal_strength: 'Signal',
     bandwidth: 'Bandwidth',
@@ -36,23 +36,22 @@ export default function RadarChartCard({ networks }) {
         <div className="glass-card animate-in delay-4">
             <div className="card-header">
                 <div className="card-title">
-                    <span className="icon">🎯</span>
                     Network Comparison
                 </div>
                 <span className="card-badge">Top {networks.length}</span>
             </div>
             <div className="chart-container">
-                <ResponsiveContainer width="100%" height={340}>
+                <ResponsiveContainer width="100%" height={320}>
                     <RadarChart data={data} cx="50%" cy="50%" outerRadius="72%">
-                        <PolarGrid stroke="rgba(255,255,255,0.08)" />
+                        <PolarGrid stroke="rgba(40, 114, 161, 0.15)" />
                         <PolarAngleAxis
                             dataKey="metric"
-                            tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 500 }}
+                            tick={{ fill: '#334155', fontSize: 11, fontWeight: 600 }}
                         />
                         <PolarRadiusAxis
                             angle={30}
                             domain={[0, 100]}
-                            tick={{ fill: '#64748b', fontSize: 9 }}
+                            tick={{ fill: '#64748B', fontSize: 9, fontWeight: 500 }}
                             tickCount={5}
                         />
                         {networks.map((net, i) => (
@@ -62,21 +61,23 @@ export default function RadarChartCard({ networks }) {
                                 dataKey={net.ssid}
                                 stroke={COLORS[i % COLORS.length]}
                                 fill={COLORS[i % COLORS.length]}
-                                fillOpacity={i === 0 ? 0.2 : 0.05}
+                                fillOpacity={i === 0 ? 0.15 : 0.03}
                                 strokeWidth={i === 0 ? 2.5 : 1.5}
                             />
                         ))}
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '8px',
-                                color: '#f1f5f9',
+                                backgroundColor: '#FFFFFF',
+                                border: '1px solid rgba(40, 114, 161, 0.2)',
+                                borderRadius: '12px',
+                                color: '#1C4F70',
                                 fontSize: '12px',
+                                fontFamily: 'Outfit, sans-serif',
+                                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
                             }}
                             formatter={(value) => `${value}%`}
                         />
-                        <Legend wrapperStyle={{ fontSize: '11px', color: '#94a3b8' }} />
+                        <Legend wrapperStyle={{ fontSize: '11px', color: '#334155' }} />
                     </RadarChart>
                 </ResponsiveContainer>
             </div>

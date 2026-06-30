@@ -5,15 +5,17 @@ const METRIC_LABELS = {
     reliability: 'Reliability',
     security: 'Security',
     cost: 'Cost',
+    cost_efficiency: 'Cost',
 };
 
 const METRIC_COLORS = {
-    signal_strength: '#6366f1',
-    bandwidth: '#22d3ee',
-    latency: '#10b981',
-    reliability: '#f59e0b',
-    security: '#8b5cf6',
-    cost: '#f43f5e',
+    signal_strength: '#8B5CF6',   /* violet */
+    bandwidth: '#2872A1',         /* Ocean Blue */
+    latency: '#10B981',           /* emerald */
+    reliability: '#F59E0B',       /* amber */
+    security: '#6366F1',           /* indigo */
+    cost: '#EF4444',              /* rose */
+    cost_efficiency: '#EF4444',
 };
 
 export default function WeightsCard({ weights }) {
@@ -25,7 +27,6 @@ export default function WeightsCard({ weights }) {
         <div className="glass-card animate-in delay-6">
             <div className="card-header">
                 <div className="card-title">
-                    <span className="icon">⚖️</span>
                     Weight Distribution
                 </div>
                 <span className="card-badge">Profile</span>
@@ -46,7 +47,7 @@ export default function WeightsCard({ weights }) {
                                     className="weight-bar-fill"
                                     style={{
                                         width: `${(value / maxWeight) * 100}%`,
-                                        background: METRIC_COLORS[key] || 'var(--accent-primary)',
+                                        background: METRIC_COLORS[key] || 'var(--ocean-blue)',
                                     }}
                                 />
                             </div>
