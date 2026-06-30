@@ -11,7 +11,7 @@ import WeightsCard from './components/WeightsCard';
 import CurrentConnection from './components/CurrentConnection';
 import MonitorPanel from './components/MonitorPanel';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
 function App() {
   const [profile, setProfile] = useState('balanced');
@@ -20,6 +20,7 @@ function App() {
   const [scanCount, setScanCount] = useState(0);
   const [error, setError] = useState(null);
   const [monitorStatus, setMonitorStatus] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const monitorInterval = useRef(null);
 
   const handleScan = useCallback(async () => {
@@ -74,9 +75,14 @@ function App() {
   useEffect(() => {
     fetch(`${API_BASE}/api/monitor/status`)
       .then(res => res.json())
-      .then(data => setMonitorStatus(data))
+      .then(data => {
+        setMonitorStatus(data);
+        if (data.monitoring) {
+          handleScan();
+        }
+      })
       .catch(console.error);
-  }, []);
+  }, [handleScan]);
 
   // Poll monitor status when monitoring is active
   useEffect(() => {
@@ -112,7 +118,29 @@ function App() {
   return (
     <>
       <div className="app-bg" />
-      <Header scanCount={scanCount} lastScan={scanData?.timestamp} />
+      <Header
+        scanCount={scanCount}
+        lastScan={scanData?.timestamp}
+        onMenuToggle={() => setMenuOpen(!menuOpen)}
+        menuOpen={menuOpen}
+      />
+
+      {/* Slide Panel — Formula & Weights */}
+      <div
+        className={`slide-panel-backdrop ${menuOpen ? 'open' : ''}`}
+        onClick={() => setMenuOpen(false)}
+      />
+      <aside className={`slide-panel ${menuOpen ? 'open' : ''}`}>
+        <div className="slide-panel-header">
+          <div className="slide-panel-title">Scoring Engine</div>
+          <button className="slide-panel-close" onClick={() => setMenuOpen(false)}>X</button>
+        </div>
+        <div className="slide-panel-body">
+          <FormulaCard formula={formula} />
+          <WeightsCard weights={weights} />
+        </div>
+      </aside>
+
       <main className="main-content">
         <ControlsBar
           profile={profile}
@@ -125,7 +153,7 @@ function App() {
 
         {error && (
           <div className="error-banner">
-            ⚠️ Connection error: {error}. Make sure the backend is running on{' '}
+            Connection error: {error}. Make sure the backend is running on{' '}
             <strong>localhost:8000</strong>.
           </div>
         )}
@@ -152,18 +180,14 @@ function App() {
             )}
 
             <div className="dashboard-grid">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <NetworkList
                   networks={networks}
                   onSwitch={handleSwitch}
                 />
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                  <FormulaCard formula={formula} />
-                  <WeightsCard weights={weights} />
-                </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <BestNetworkCard best={best} onSwitch={handleSwitch} />
                 <RadarChartCard networks={networks.slice(0, 5)} />
                 <MonitorPanel
@@ -177,7 +201,6 @@ function App() {
 
         {!scanData && !error && (
           <div className="empty-state animate-in">
-            <div className="empty-icon">📡</div>
             <div className="empty-title">Ready to Scan Real Networks</div>
             <div className="empty-desc">
               Select a usage profile and click <strong>Scan Networks</strong> to

@@ -13,6 +13,7 @@ import json
 import time
 
 from models import ScanRequest, SwitchRequest, MonitorControl, UsageProfile
+from qos import apply_qos_policy, remove_qos_policy, get_current_qos
 from scanner import (
     scan_visible_networks,
     get_current_connection,
@@ -37,7 +38,12 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -78,6 +84,7 @@ async def scan_networks(profile: str = Query("balanced")):
     """
     Scan real WiFi networks, measure latency/throughput, and score using WMCDA.
     This reads actual data from your Windows WiFi adapter.
+    Also applies the corresponding QoS DSCP policy for the selected profile.
     """
     # Validate profile
     try:
@@ -86,7 +93,17 @@ async def scan_networks(profile: str = Query("balanced")):
         usage_profile = UsageProfile.BALANCED
     
     monitor.set_profile(usage_profile.value)
-    result = monitor.do_scan()
+    
+    # Apply QoS policy for the selected profile
+    qos_result = apply_qos_policy(usage_profile.value)
+    
+    # If background monitor is active, return the cached result to avoid lock contention
+    if monitor.get_status()["monitoring"] and monitor.latest_scan:
+        result = dict(monitor.latest_scan)
+    else:
+        result = monitor.do_scan()
+        
+    result["qos"] = qos_result
     return result
 
 
@@ -232,6 +249,32 @@ async def configure_monitor(config: MonitorControl):
         monitor.stop_monitoring()
     
     return monitor.get_status()
+
+
+# ============================================================================
+# QoS Traffic Routing
+# ============================================================================
+
+@app.get("/api/qos/status")
+async def qos_status():
+    """Get the current QoS DSCP policy status."""
+    return get_current_qos()
+
+
+@app.post("/api/qos/apply")
+async def qos_apply(profile: str = Query("balanced")):
+    """Manually apply a QoS DSCP policy for the given profile."""
+    try:
+        usage_profile = UsageProfile(profile)
+    except ValueError:
+        usage_profile = UsageProfile.BALANCED
+    return apply_qos_policy(usage_profile.value)
+
+
+@app.post("/api/qos/remove")
+async def qos_remove():
+    """Remove the adaptive network QoS policy."""
+    return remove_qos_policy()
 
 
 # ============================================================================
