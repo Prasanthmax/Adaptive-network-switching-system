@@ -322,18 +322,13 @@ class NetworkMonitor:
     def _monitor_loop(self):
         """Background loop that periodically scans and evaluates."""
         while self._running:
-            start_time = time.time()
             try:
                 self.do_scan()
             except Exception as e:
                 print(f"[Monitor] Scan error: {e}")
             
-            elapsed = time.time() - start_time
-            sleep_needed = max(1.0, self.scan_interval - elapsed)
-            
-            # Sleep in 0.5s increments to respond quickly to stopping requests
-            steps = int(sleep_needed * 2)
-            for _ in range(steps):
+            # Sleep in small increments so we can stop quickly
+            for _ in range(int(self.scan_interval * 2)):
                 if not self._running:
                     break
                 time.sleep(0.5)

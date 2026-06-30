@@ -5,6 +5,7 @@ export default function FormulaCard({ formula }) {
         <div className="glass-card formula-section animate-in delay-5">
             <div className="card-header">
                 <div className="card-title">
+                    <span className="icon">📐</span>
                     Scoring Formula
                 </div>
                 <span className="card-badge">WMCDA</span>

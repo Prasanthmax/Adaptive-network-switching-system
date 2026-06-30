@@ -8,18 +8,21 @@ export default function MonitorPanel({ status, onToggle }) {
         <div className="glass-card animate-in delay-5">
             <div className="card-header">
                 <div className="card-title">
+                    <span className="icon">🤖</span>
                     Auto-Switch Monitor
                 </div>
                 <span className="card-badge" style={{
-                    background: status.monitoring ? 'var(--accent-emerald-dim)' : 'var(--accent-rose-dim)',
-                    color: status.monitoring ? 'var(--accent-emerald)' : 'var(--accent-rose)',
-                    borderColor: status.monitoring ? 'rgba(74, 222, 128, 0.25)' : 'rgba(251, 113, 133, 0.25)',
+                    background: status.monitoring
+                        ? 'rgba(16, 185, 129, 0.15)' : 'rgba(244, 63, 94, 0.15)',
+                    color: status.monitoring ? '#6ee7b7' : '#fda4af',
+                    borderColor: status.monitoring
+                        ? 'rgba(16, 185, 129, 0.3)' : 'rgba(244, 63, 94, 0.3)',
                 }}>
                     {status.monitoring ? 'ACTIVE' : 'STOPPED'}
                 </span>
             </div>
             <div className="card-body">
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '14px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
                     <InfoBlock label="Scans" value={status.scan_count} />
                     <InfoBlock label="Switches" value={status.switch_count} />
                     <InfoBlock label="Threshold" value={`${(status.quality_threshold * 100).toFixed(0)}%`} />
@@ -29,37 +32,29 @@ export default function MonitorPanel({ status, onToggle }) {
                 {status.switch_log && status.switch_log.length > 0 && (
                     <div>
                         <div style={{
-                            fontSize: '0.65rem',
+                            fontSize: '0.72rem',
                             color: 'var(--text-muted)',
                             textTransform: 'uppercase',
                             letterSpacing: '0.06em',
-                            marginBottom: '6px',
-                            fontWeight: 600,
+                            marginBottom: '8px',
                         }}>
                             Recent Switches
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                             {status.switch_log.slice(-5).reverse().map((log, i) => (
                                 <div key={i} style={{
-                                    padding: '8px 10px',
-                                    background: 'var(--bg-card)',
-                                    border: '1px solid var(--border-default)',
+                                    padding: '8px 12px',
+                                    background: 'var(--bg-glass)',
+                                    border: '1px solid var(--border-subtle)',
                                     borderRadius: 'var(--radius-sm)',
-                                    fontSize: '0.72rem',
+                                    fontSize: '0.75rem',
                                     color: 'var(--text-secondary)',
                                 }}>
-                                    <div style={{
-                                        fontWeight: 700,
-                                        color: log.success ? 'var(--accent-emerald)' : 'var(--accent-rose)',
-                                    }}>
-                                        {log.from_network} to {log.to_network}
-                                        {log.success ? ' (Success)' : ' (Failed)'}
+                                    <div style={{ fontWeight: 600, color: log.success ? '#6ee7b7' : '#fda4af' }}>
+                                        {log.from_network} → {log.to_network}
+                                        {log.success ? ' ✓' : ' ✗'}
                                     </div>
-                                    <div style={{
-                                        fontSize: '0.6rem',
-                                        color: 'var(--text-muted)',
-                                        marginTop: '2px',
-                                    }}>
+                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '2px' }}>
                                         {log.reason}
                                     </div>
                                 </div>
@@ -76,21 +71,16 @@ function InfoBlock({ label, value }) {
     return (
         <div style={{
             padding: '10px',
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-default)',
+            background: 'var(--bg-glass)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius-sm)',
             textAlign: 'center',
         }}>
-            <div style={{
-                fontSize: '0.6rem',
-                color: 'var(--text-muted)',
-                textTransform: 'uppercase',
-                fontWeight: 600,
-            }}>
+            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                 {label}
             </div>
             <div style={{
-                fontSize: '1rem',
+                fontSize: '1.1rem',
                 fontWeight: 700,
                 fontFamily: "'JetBrains Mono', monospace",
                 color: 'var(--text-primary)',

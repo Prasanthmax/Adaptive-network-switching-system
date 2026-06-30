@@ -1,6 +1,6 @@
 """
-WMCDA Scoring Engine — Real Network Edition (v2)
-==================================================
+WMCDA Scoring Engine — Real Network Edition
+=============================================
 Scores real WiFi networks using:
   - Actual signal strength (from netsh)
   - Measured throughput (from psutil byte counters)
@@ -10,11 +10,9 @@ Scores real WiFi networks using:
   - Cost efficiency (free WiFi = high, metered = low)
 
 Formula:
-    CNS = Σ(wi × Ni) / Σ(wi) × stability_factor
+    CNS = Σ(wi × Ni) / Σ(wi)
 
-    Where Ni are normalized metrics [0, 1], wi are profile-specific weights,
-    and stability_factor is a dynamic penalty applied when a network shows
-    signs of instability (high packet loss, extreme latency, or jitter).
+    Where Ni are normalized metrics [0, 1] and wi are profile-specific weights.
 """
 
 from config import NORMALIZATION, SECURITY_LEVELS, WEIGHT_PROFILES, DEFAULT_WEIGHTS
@@ -114,45 +112,17 @@ def compute_network_score(network: dict, weights: dict, latency_ms: float = 50,
         "cost_efficiency": cost_norm,
     }
     
-    # 2. Dynamic Stability Penalty
-    # If the network shows instability (high loss or extreme latency),
-    # we dynamically boost reliability weight and apply a penalty factor.
-    stability_factor = 1.0
-    adjusted_weights = dict(weights)
-    
-    # Penalize high packet loss aggressively
-    if packet_loss > 20:
-        stability_factor *= 0.70   # Severe penalty
-        adjusted_weights["reliability"] = adjusted_weights.get("reliability", 0.15) * 1.8
-    elif packet_loss > 10:
-        stability_factor *= 0.85   # Moderate penalty
-        adjusted_weights["reliability"] = adjusted_weights.get("reliability", 0.15) * 1.4
-    elif packet_loss > 5:
-        stability_factor *= 0.92   # Light penalty
-        adjusted_weights["reliability"] = adjusted_weights.get("reliability", 0.15) * 1.2
-    
-    # Penalize extreme latency (> 200ms is very bad for real-time)
-    if latency_ms > 300:
-        stability_factor *= 0.75
-        adjusted_weights["latency"] = adjusted_weights.get("latency", 0.20) * 1.5
-    elif latency_ms > 150:
-        stability_factor *= 0.90
-        adjusted_weights["latency"] = adjusted_weights.get("latency", 0.20) * 1.2
-    
-    # 3. Weighted scoring with adjusted weights
+    # 2. Weighted scoring
     component_scores = {}
     for metric, norm_val in normalized.items():
-        w = adjusted_weights.get(metric, 0)
+        w = weights.get(metric, 0)
         component_scores[metric] = round(w * norm_val, 4)
     
-    total_weight = sum(adjusted_weights.values())
+    total_weight = sum(weights.values())
     composite = sum(component_scores.values()) / total_weight if total_weight > 0 else 0
-    
-    # Apply stability factor
-    composite = composite * stability_factor
     composite = round(composite, 4)
     
-    # 4. Generate recommendation
+    # 3. Generate recommendation
     recommendation = _get_recommendation(composite, network["ssid"])
     
     return {
@@ -172,7 +142,6 @@ def compute_network_score(network: dict, weights: dict, latency_ms: float = 50,
         "packet_loss_percent": round(packet_loss, 1),
         "reliability_percent": round(reliability, 1),
         "security_level": security_level,
-        "stability_factor": stability_factor,
         "normalized_metrics": normalized,
         "component_scores": component_scores,
         "composite_score": composite,
@@ -238,11 +207,10 @@ def get_formula_explanation(profile: str = "balanced") -> str:
     total = sum(weights.values())
     
     return (
-        f"Composite Network Score (CNS) = [{formula_str}] / {total:.2f} × stability_factor\n\n"
+        f"Composite Network Score (CNS) = [{formula_str}] / {total:.2f}\n\n"
         f"Profile: {profile}\n"
         f"All metrics normalized to [0, 1] where 1 = best.\n"
         f"Latency is inverted (lower ms = higher score).\n"
-        f"stability_factor penalizes high packet loss and extreme latency.\n"
         f"Data source: Real-time Windows netsh + psutil measurements."
     )
 

@@ -65,7 +65,7 @@ export default function NetworkList({ networks, onSwitch }) {
                             <div
                                 key={net.bssid || net.ssid}
                                 className={`network-item ${isBest ? 'best' : ''} ${net.is_current ? 'current' : ''} animate-in delay-${Math.min(i + 1, 10)}`}
-                                style={{ gridTemplateColumns: '36px 1fr 80px 80px 80px' }}
+                                style={{ gridTemplateColumns: '40px 1fr 90px 90px 90px' }}
                             >
                                 <div className="network-rank">{net.rank}</div>
 
@@ -76,13 +76,12 @@ export default function NetworkList({ networks, onSwitch }) {
                                         {net.ssid}
                                         {net.is_known && (
                                             <span style={{
-                                                fontSize: '0.56rem',
-                                                background: 'rgba(40, 114, 161, 0.1)',
-                                                color: 'var(--ocean-blue)',
-                                                padding: '2px 7px',
-                                                borderRadius: '6px',
-                                                marginLeft: '7px',
-                                                fontWeight: 600,
+                                                fontSize: '0.6rem',
+                                                background: 'rgba(99, 102, 241, 0.15)',
+                                                color: '#a5b4fc',
+                                                padding: '1px 6px',
+                                                borderRadius: '4px',
+                                                marginLeft: '8px',
                                             }}>saved</span>
                                         )}
                                     </div>
@@ -113,33 +112,32 @@ export default function NetworkList({ networks, onSwitch }) {
                                 <div style={{ textAlign: 'center' }}>
                                     {net.is_current ? (
                                         <span style={{
-                                            fontSize: '0.68rem',
-                                            color: 'var(--accent-emerald)',
-                                            fontWeight: 700,
+                                            fontSize: '0.7rem',
+                                            color: '#6ee7b7',
+                                            fontWeight: 600,
                                         }}>Connected</span>
                                     ) : net.is_known ? (
                                         <button
                                             onClick={() => handleSwitch(net.ssid)}
                                             disabled={switching === net.ssid}
                                             style={{
-                                                padding: '6px 14px',
-                                                fontSize: '0.68rem',
-                                                fontWeight: 700,
+                                                padding: '5px 12px',
+                                                fontSize: '0.7rem',
+                                                fontWeight: 600,
                                                 fontFamily: 'inherit',
-                                                background: 'var(--ocean-blue)',
+                                                background: 'var(--gradient-primary)',
                                                 color: 'white',
-                                                border: '1px solid var(--ocean-blue)',
-                                                borderRadius: 'var(--radius-sm)',
+                                                border: 'none',
+                                                borderRadius: 'var(--radius-full)',
                                                 cursor: 'pointer',
                                                 opacity: switching === net.ssid ? 0.5 : 1,
-                                                transition: 'var(--transition-fast)',
                                             }}
                                         >
                                             {switching === net.ssid ? '...' : 'Switch'}
                                         </button>
                                     ) : (
                                         <span style={{
-                                            fontSize: '0.62rem',
+                                            fontSize: '0.65rem',
                                             color: 'var(--text-muted)',
                                         }}>Unknown</span>
                                     )}
